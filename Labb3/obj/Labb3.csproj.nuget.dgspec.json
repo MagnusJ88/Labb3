@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\chris\\source\\repos\\Labb3\\Labb3\\Labb3.csproj": {}
+    "C:\\Users\\chris\\Source\\Repos\\Labb3.0\\Labb3\\Labb3.csproj": {}
   },
   "projects": {
-    "C:\\Users\\chris\\source\\repos\\Labb3\\Labb3\\Labb3.csproj": {
+    "C:\\Users\\chris\\Source\\Repos\\Labb3.0\\Labb3\\Labb3.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\chris\\source\\repos\\Labb3\\Labb3\\Labb3.csproj",
+        "projectUniqueName": "C:\\Users\\chris\\Source\\Repos\\Labb3.0\\Labb3\\Labb3.csproj",
         "projectName": "Labb3",
-        "projectPath": "C:\\Users\\chris\\source\\repos\\Labb3\\Labb3\\Labb3.csproj",
+        "projectPath": "C:\\Users\\chris\\Source\\Repos\\Labb3.0\\Labb3\\Labb3.csproj",
         "packagesPath": "C:\\Users\\chris\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\chris\\source\\repos\\Labb3\\Labb3\\obj\\",
+        "outputPath": "C:\\Users\\chris\\Source\\Repos\\Labb3.0\\Labb3\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\chris\\AppData\\Roaming\\NuGet\\NuGet.Config",

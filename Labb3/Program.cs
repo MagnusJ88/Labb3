@@ -7,122 +7,116 @@ namespace Labb3
 {
     class Program
     {
-
-        //Läs in filen och lägg till datan som bytes i en array
-        //kör en metod som kollar om de första 8 bytes är =  0x 89 50 4E 47 0D 0A 1A 0A. Om true => det är en PNG fil och fortsätt i programmet. Om false = cw("This is not a valid .bmp or .png file!")
-        // kör en metod som kollar från plats 16-19 och konvertar från bytes till dec. Detta blir Width. Spara i en variabel.
-        // kör en metod som kollar från plats 20 - 23 och konverterar från bytes till dec. Detta blir Height. Spara i en variabel.
-        //Skriv ut datan i consolen: storlek, och vilken filtyp.
-        //Vi har nu all info om filen för G-nivå.
-
-
-        // Lenght: Läs av plats 5-8(byte) som visar hur lång datan i den chunken kommer vara kallat Lenght. längden på datan är summan av de 4 bytes dock ej medräknat Lenght
-
-
-
         static void Main(string[] args)
         {
-            Console.Write("Skriv in en sökväg för en .png eller .BMP fil:");
-            string filePath = Console.ReadLine();
-            var fileStream = new FileStream(filePath, FileMode.Open);
-
+            string filePath = args[0];
             var pngSignature = new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 };
             var bmpSignature = new byte[] { 66, 77 };
-            //var fileSize = (int)filePNG.Length;
 
-
-            var signatureArr = new byte[8];
-
-            fileStream.Read(signatureArr, 0, 8);
-
-            var dataPixels = new byte[8];
-
-            fileStream.Seek(16, SeekOrigin.Begin);
-            fileStream.Read(dataPixels, 0, 8);
-            fileStream.Close();
-
-
-            if (pngSignature.SequenceEqual(signatureArr))
+            try
             {
-                displayPngInfo(dataPixels);
-                displayChunks(filePath);
+                var fileStream = new FileStream(filePath, FileMode.Open);
+                var signatureArray = new byte[8];
+                fileStream.Read(signatureArray, 0, 8);
+
+                fileStream.Seek(16, SeekOrigin.Begin);
+                var dataPixels = new byte[8];
+                fileStream.Read(dataPixels, 0, 8);
+
+                fileStream.Close();
+
+                if (pngSignature.SequenceEqual(signatureArray))
+                {
+                    DisplayPNGInfo(dataPixels);
+                    DisplayPNGChunks(filePath);
+                }
+                else if (bmpSignature[0] == signatureArray[0] && bmpSignature[1] == signatureArray[1])
+                {
+                    DisplayBMPInfo(dataPixels);
+                }
+                else
+                {
+                    Console.WriteLine("This is not a valid .bmp or .png file!");
+                }
             }
-            else if (bmpSignature[0] == signatureArr[0] && bmpSignature[1] == signatureArr[1])
+            catch (Exception)
             {
-                displayBMPInfo(dataPixels);
-            }
-            else
-            {
-                Console.WriteLine("This is not a valid .bmp or .png file!");
+                Console.WriteLine("Application has crashed. Are you sure input was a valid filepath?");
             }
 
-            
-
-
+            Console.WriteLine("\nPress any key to exit!");
+            Console.ReadKey();
         }
-        public static void displayPngInfo(byte[] bytes1)
+        public static void DisplayPNGInfo(byte[] imageData)
         {
-            int width = 0, height = 0;
-            
+            var widthArray = new byte[4];
+            var heightArray = new byte[4];
 
-            for (int i = 0; i <= 3; i++)
+            for (int i = 0; i < 4; i++)
             {
-                width = bytes1[i] | width << 8;
-                height = bytes1[i + 4] | height << 8;
+                widthArray[i] = imageData[i];
+                heightArray[i] = imageData[i + 4];
             }
+            Array.Reverse(widthArray);
+            Array.Reverse(heightArray);
 
-            Console.WriteLine($"This is a .png image. Resolution: {width}x{height} pixels.");
-        }
+            int width = BitConverter.ToInt32(widthArray);
+            int height = BitConverter.ToInt32(heightArray);
 
-        public static void displayBMPInfo(byte[] bytes2)
-        {
-
-
-            int width = 0, height = 0;
-
-            for (int i = 3; i >= 2; i--)
-            {
-                width = bytes2[i] | width << 8;
-                height = bytes2[i + 4] | height << 8;
-            }
-
-            Console.WriteLine($"This is a .BMP image. Resolution: {width}x{height} pixels.");
+            Console.WriteLine($"\nThis is a .png image. Resolution: {width}x{height} pixels.\n");
         }
 
-        public static void displayChunks(string filepath)
+        public static void DisplayBMPInfo(byte[] imageData)
         {
+            var widthArray = new byte[4];
+            var heightArray = new byte[4];
 
-            var fileStreamChunk = new FileStream(filepath, FileMode.Open);
+            for (int i = 0; i < 2; i++)
+            {
+                widthArray[i] = imageData[i + 2];
+                heightArray[i] = imageData[i + 6];
+            }
+
+            int width = BitConverter.ToInt32(widthArray);
+            int height = BitConverter.ToInt32(heightArray);
+
+            Console.WriteLine($"\nThis is a .BMP image. Resolution: {width}x{height} pixels.\n");
+        }
+
+        public static void DisplayPNGChunks(string filepath)
+        {
             var ChunkLengthArr = new byte[4];
             var ChunkTypeArr = new byte[4];
+
+            var fileStreamChunk = new FileStream(filepath, FileMode.Open);
+
             bool findChunks = false;
             int startIndex = 8;
-            string chunkType = "";
             int lengthValue;
+            string chunkType;
 
             while (findChunks == false)
             {
                 fileStreamChunk.Seek(startIndex, SeekOrigin.Begin);
                 fileStreamChunk.Read(ChunkLengthArr, 0, 4);
+
                 fileStreamChunk.Seek(startIndex + 4, SeekOrigin.Begin);
                 fileStreamChunk.Read(ChunkTypeArr, 0, 4);
-                
+
                 Array.Reverse(ChunkLengthArr);
                 lengthValue = BitConverter.ToInt32(ChunkLengthArr);
-              
+
                 startIndex += lengthValue + 12;
                 chunkType = Encoding.ASCII.GetString(ChunkTypeArr);
-                Console.WriteLine($"{chunkType} - Length: {lengthValue}");
+
+                Console.WriteLine($"Chunk type: {chunkType} - Length: {lengthValue} bytes");
 
                 if (chunkType == "IEND")
                 {
                     findChunks = true;
                 }
-
             }
-
             fileStreamChunk.Close();
         }
     }
-
 }
