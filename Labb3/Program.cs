@@ -9,7 +9,16 @@ namespace Labb3
     {
         static void Main(string[] args)
         {
-            string filePath = args[0];
+            string filePath;
+            if (args.Length == 0)
+            {
+                Console.Write("Input filepath for a .PNG or .BMP file: ");
+                filePath = Console.ReadLine();
+            }
+            else
+            {
+                filePath = args[0];
+            }
             var pngSignature = new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 };
             var bmpSignature = new byte[] { 66, 77 };
 
